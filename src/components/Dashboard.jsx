@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import ModuloVendas from './ModuloVendas';
 
 // Dados de Market Share - Agosto 2026
 const marketShareData = [
@@ -43,35 +44,77 @@ const respostaTradicionaisData = [
   { montadora: 'Toyota', estrategia: 'Foco em híbridos', investimento: 'R$ 5.5 bi', status: 'Produção local' },
 ];
 
-// Componente: Header
-const Header = () => (
-  <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
-    <div className="max-w-7xl mx-auto px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-            Mercado Automotivo Brasil 2026
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Avanço das Montadoras Chinesas
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-gray-400 uppercase tracking-wider">
-            Atualizado
-          </p>
-          <p className="text-sm font-medium text-gray-700">
-            Setembro 2026
-          </p>
+// Componente: Header com navegação
+const Header = ({ moduloAtual, setModuloAtual }) => {
+  const modulos = [
+    { id: 'overview', label: 'Visão Geral' },
+    { id: 'vendas', label: 'Vendas' },
+  ];
+
+  return (
+    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+      <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+              Mercado Automotivo Brasil 2026
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Avanço das Montadoras Chinesas
+            </p>
+          </div>
+          <div className="flex items-center gap-6">
+            {/* Navegação */}
+            <nav className="flex gap-2">
+              {modulos.map((modulo) => (
+                <button
+                  key={modulo.id}
+                  onClick={() => setModuloAtual(modulo.id)}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    moduloAtual === modulo.id
+                      ? 'bg-green-50 text-green-700'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {modulo.label}
+                </button>
+              ))}
+            </nav>
+            <div className="text-right">
+              <p className="text-xs text-gray-400 uppercase tracking-wider">
+                Atualizado
+              </p>
+              <p className="text-sm font-medium text-gray-700">
+                Setembro 2026
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
+  );
+};
+
+// Componente: Skeleton Loader
+const SkeletonCard = () => (
+  <div className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
+    <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+    <div className="h-64 bg-gray-200 rounded"></div>
+  </div>
 );
 
 // Componente: Market Share
 const MarketShare = () => {
   const [activeIndex, setActiveIndex] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simular carregamento
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) return <SkeletonCard />;
 
   const onPieEnter = (_, index) => {
     setActiveIndex(index);
@@ -155,7 +198,7 @@ const ImpactoIndustrial = () => (
       {producaoLocalData.map((item, index) => (
         <div 
           key={index}
-          className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+          className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all"
         >
           <div className="flex items-start justify-between mb-2">
             <h3 className="font-semibold text-gray-900">{item.montadora}</h3>
@@ -207,7 +250,7 @@ const AnaliseEstrategica = () => (
         </thead>
         <tbody>
           {respostaTradicionaisData.map((item, index) => (
-            <tr key={index} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+            <tr key={index} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
               <td className="py-3 px-4 font-medium text-gray-900">{item.montadora}</td>
               <td className="py-3 px-4 text-gray-700">{item.estrategia}</td>
               <td className="py-3 px-4 text-gray-700">{item.investimento}</td>
@@ -292,70 +335,96 @@ const EvolucaoTemporal = () => (
 
 // Componente Principal: Dashboard
 const Dashboard = () => {
+  const [moduloAtual, setModuloAtual] = useState('overview');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simular carregamento inicial
+    const timer = setTimeout(() => setIsLoading(false), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-600 mt-4">Carregando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <Header moduloAtual={moduloAtual} setModuloAtual={setModuloAtual} />
       
-      <main className="pt-24 pb-12 px-6">
+      <main className="pt-28 pb-12 px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Grid Principal */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <MarketShare />
-            <EvolucaoTemporal />
-          </div>
+          {moduloAtual === 'overview' ? (
+            <>
+              {/* Grid Principal */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <MarketShare />
+                <EvolucaoTemporal />
+              </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div className="lg:col-span-2">
-              <ImpactoIndustrial />
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Destaques 2026
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">BYD lidera varejo</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      12,8% de market share em abril, superando Volkswagen
-                    </p>
-                  </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div className="lg:col-span-2">
+                  <ImpactoIndustrial />
                 </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">GWM supera Honda</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Primeira vez em agosto com 9.924 unidades (3,8% share)
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Geely inicia produção</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      EX5 EM-i produzido em parceria com Renault no Paraná
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">8 marcas produzindo</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      BYD, GWM, Geely, GAC, Changan, Leapmotor, Caoa Chery, MG
-                    </p>
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    Destaques 2026
+                  </h2>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">BYD lidera varejo</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          12,8% de market share em abril, superando Volkswagen
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">GWM supera Honda</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Primeira vez em agosto com 9.924 unidades (3,8% share)
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Geely inicia produção</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          EX5 EM-i produzido em parceria com Renault no Paraná
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 mt-2 bg-green-500 rounded-full flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">8 marcas produzindo</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          BYD, GWM, Geely, GAC, Changan, Leapmotor, Caoa Chery, MG
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            <AnaliseEstrategica />
-          </div>
+              <div className="grid grid-cols-1 gap-6">
+                <AnaliseEstrategica />
+              </div>
+            </>
+          ) : (
+            <ModuloVendas />
+          )}
 
           {/* Footer */}
           <footer className="mt-12 text-center text-xs text-gray-400">
